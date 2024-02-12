@@ -5,4 +5,5 @@ export interface Discos {
   strGenre: string;
   strBiographyEN: string;
   strArtistLogo: string;
+  strDescriptionES: string;
 }

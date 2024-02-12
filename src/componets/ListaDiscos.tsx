@@ -1,64 +1,71 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { Image, StyleSheet, Text } from "react-native"
+import { FlatList, Image, Pressable, StyleSheet, Text } from "react-native"
 import { PropsArtista } from "./Artista";
-import { useBusquedaArtista } from "../hooks/useBusquedaArtista";
+import { Album } from "../models/Album";
+import { useListaAlbums } from "../hooks/useListaAlbums";
+import { ItemAlbum } from "./ItemAlbum";
+import { useEffect } from "react";
 
 
+ 
+export const ListaDiscos = ({ route, navigation }: NativeStackScreenProps<any, any>) => {
 
+    const { idArtist, strArtist, strArtistLogo } = route.params as PropsArtista;
 
+    const { listaAlbums, updLista } = useListaAlbums(
+        {
+            lista:[]
+        }        
+    )
 
-const { txtBusqueda, updTxtBusqueda } = useBusquedaArtista('');
-
- const cargarDatos = async (id:string) => {
-
-    try {
-      
-        const url = `www.theaudiodb.com/api/v1/json/discography-mb.php?s=${id}`;
-
-        console.log(url);
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) {
-            throw new Error('Error al obtener los datos de discografia');
+    const getAlbums= async()=>{
+        try {
+                const url = `https://www.theaudiodb.com/api/v1/json/2/album.php?i=${idArtist}`;
+                const respuesta = fetch(url);
+                if (!(await respuesta).ok) {
+                    throw new Error('Error al obtener los datos de los personajes');
         }
-        const datos = await respuesta.json();
-        console.log(datos);
-        // const artistaDatos:PropsArtista = {
-        //                                      idArtist: datos.artists[0].idArtist,
-        //                                         strArtist: datos.artists[0].strArtist,
-        //                                         strStyle: datos.artists[0].strStyle,
-        //                                         strGenre: datos.artists[0].strGenre,
-        //                                         strBiographyEN: datos.artists[0].strBiographyEN,
-        //                                         strArtistLogo: datos.artists[0].strArtistLogo,
-        //                                         strMusicBrainzID: datos.artists[0].strMusicBrainzID
-        //                             };
-           
-
-          
-          // updArtista(artistaDatos);
-           
+            const datos = await (await respuesta).json();
+            const discografia:Album[] = datos.album.map((item:any)=>({
+                idAlbum:item.idAlbum,
+                strAlbum:item.strAlbum,
+                intYearReleased:item.intYearReleased,
+                strStyle:item.strStyle,
+                strGenre:item.strGenre,
+                strAlbumThumb:item.strAlbumThumb==null?'https://enciclopedia.net/wp-content/uploads/2014/07/disco-380x380.jpg':item.strAlbumThumb
+        
+            })
+        );
+        updLista(discografia);
+ 
     } catch (error) {
         console.error('Error al obtener los datos:', error);
         throw error;
-    }
+    }}
+    
+    getAlbums();
 
- }
 
-export const ListaDiscos = ({ route, navigation }: NativeStackScreenProps<any, any>) => {
-
-    const { idArtist, strArtist, strArtistLogo, strMusicBrainzID } = route.params as PropsArtista;
-
- 
-
-        cargarDatos(strMusicBrainzID);
-
-    return(
-
+    return(       
         <>   
 
-             <Image style={styles.imagen}
+
+        
+            <Image style={styles.imagen}
                 source={{ uri: strArtistLogo}} />
-            <Text>DISCOGRAFIA- {strArtist}</Text>
-         
+    
+ 
+            <FlatList
+              data={listaAlbums}
+              renderItem={({item}) => <>
+
+            <Pressable  onPress={() => navigation.navigate("detalleAlbum",{...item})}>                
+                <ItemAlbum {...item}  />  
+            </Pressable>                               
+              </>    }
+              keyExtractor={item => item.idAlbum}
+            />
+
 
         </>
     )

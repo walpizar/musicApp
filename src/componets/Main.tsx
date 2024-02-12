@@ -52,24 +52,25 @@ const handlerConsultar = async () => {
 };  
 
     return (
-        <View style={styles.container}>
+        <View >
      
-                <View style={styles.overlay}>
-                    <View style={styles.row}>
-                        <Text style={styles.mainText}>
+                <View >
+                    <View >
+                        <Text >
                             Consulta de Artista
                         </Text>
                     </View>
                     <TextInput
                         onChangeText={(texto) => updTxtBusqueda(texto)}
                         
-                        style={[styles.zipCode, styles.mainText]}
+                        
                     />
                     <Button onPress={handlerConsultar} title="Consultar" />
                     
             
                 </View>
                 <View>
+                
                 <Artista {...artista} >
                             </Artista>
                 </View>
